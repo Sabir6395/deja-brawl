@@ -1,0 +1,5 @@
+node_modules/
+
+# Planning docs, kept local only
+PRD_DejaBrawl.md
+DejaBrawl_Prompts.md

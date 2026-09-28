@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d17">
+  <title>Déjà Brawl</title>
+  <style>
+    :root {
+      --bg: #0b0d17;
+      --panel: #121528;
+      --panel-edge: #262b4d;
+      --text: #e6e9ff;
+      --muted: #8a90b8;
+      --cyan: #00e5ff;
+      --magenta: #ff2bd6;
+      --gold: #ffd23f;
+      --danger: #ff5c7a;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(rgba(0, 229, 255, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.045) 1px, transparent 1px);
+      background-size: 40px 40px;
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hidden { display: none !important; }
+
+    .screen {
+      width: 100%;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 32px 16px 48px;
+    }
+
+    /* ---------- Logo ---------- */
+    .logo {
+      margin: 8px 0 4px;
+      text-align: center;
+      font-size: clamp(2.4rem, 11vw, 4.2rem);
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: #fff;
+      text-shadow: 0 0 8px var(--cyan), 0 0 24px var(--cyan), 3px 3px 0 var(--magenta);
+    }
+    .tagline {
+      text-align: center;
+      margin: 10px 0 28px;
+      color: var(--muted);
+      font-style: italic;
+      letter-spacing: 0.03em;
+    }
+
+    /* ---------- Cards, inputs, buttons ---------- */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--panel-edge);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 0 30px rgba(0, 229, 255, 0.06);
+    }
+    .stack { display: flex; flex-direction: column; gap: 12px; }
+    .row { display: flex; gap: 10px; }
+    .row > input { flex: 1; min-width: 0; }
+    label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+    input {
+      font: inherit;
+      font-size: 1.05rem;
+      color: var(--text);
+      background: #0a0c18;
+      border: 1px solid var(--panel-edge);
+      border-radius: 10px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.18); }
+    #code-input { text-transform: uppercase; letter-spacing: 0.3em; font-weight: 700; text-align: center; max-width: 150px; }
+
+    button {
+      font: inherit;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      border-radius: 10px;
+      padding: 12px 18px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: transform 0.08s, box-shadow 0.15s, opacity 0.15s;
+    }
+    button:active:not(:disabled) { transform: scale(0.97); }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-primary {
+      background: var(--cyan);
+      color: #041018;
+      box-shadow: 0 0 18px rgba(0, 229, 255, 0.45);
+    }
+    .btn-primary:hover:not(:disabled) { box-shadow: 0 0 28px rgba(0, 229, 255, 0.7); }
+    .btn-secondary {
+      background: transparent;
+      color: var(--magenta);
+      border-color: var(--magenta);
+      box-shadow: inset 0 0 12px rgba(255, 43, 214, 0.15);
+    }
+    .btn-secondary:hover:not(:disabled) { box-shadow: 0 0 16px rgba(255, 43, 214, 0.45); }
+    .btn-wide { width: 100%; padding: 14px; font-size: 1.1rem; }
+
+    .divider {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.15em;
+    }
+    .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--panel-edge); }
+
+    .error { min-height: 1.3em; margin: 0; color: var(--danger); font-size: 0.95rem; text-align: center; }
+
+    /* ---------- Rules card ---------- */
+    .rules h2 {
+      margin: 0 0 12px; font-size: 0.85rem; color: var(--gold);
+      text-transform: uppercase; letter-spacing: 0.15em;
+    }
+    .rules ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 8px; line-height: 1.45; }
+    .rules li::marker { color: var(--cyan); font-weight: 700; }
+    .rules em { color: #fff; font-style: normal; font-weight: 600; }
+
+    /* ---------- Home layout ---------- */
+    .home-grid { display: grid; gap: 16px; max-width: 460px; margin: 0 auto; }
+
+    /* ---------- Lobby ---------- */
+    .code-block { text-align: center; margin-bottom: 20px; }
+    .code-label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; }
+    .room-code {
+      font-size: clamp(3.5rem, 20vw, 6rem);
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      margin: 4px 0 14px 0.18em; /* offset trailing letter-spacing */
+      color: #fff;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      text-shadow: 0 0 10px var(--magenta), 0 0 30px var(--magenta);
+      line-height: 1;
+    }
+    .copy-status { display: inline-block; min-width: 5em; margin-left: 8px; color: var(--gold); font-weight: 600; }
+
+    .lobby-grid { display: grid; gap: 16px; }
+    @media (min-width: 760px) {
+      .lobby-grid { grid-template-columns: 1fr 1fr; align-items: start; }
+    }
+
+    .players-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+    .players-head h2 { margin: 0; font-size: 0.85rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.15em; }
+    .players-head span { color: var(--muted); font-size: 0.9rem; }
+
+    #player-list { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    #player-list li {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px;
+      background: #0a0c18;
+      border: 1px solid var(--panel-edge);
+      border-radius: 10px;
+      font-size: 1.05rem;
+    }
+    #player-list li.me { border-color: rgba(0, 229, 255, 0.5); }
+    .dot { width: 16px; height: 16px; border-radius: 50%; flex: none; }
+    .pname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tag { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .crown { font-size: 1.1rem; }
+
+    .waiting { text-align: center; color: var(--muted); margin: 0; padding: 12px 0; }
+    .waiting::after { content: ""; animation: dots 1.5s steps(4) infinite; }
+    @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+
+    /* ---------- Game ---------- */
+    body.playing { position: fixed; inset: 0; overflow: hidden; overscroll-behavior: none; }
+    #game { position: fixed; inset: 0; }
+    #arena {
+      display: block;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .rotate-hint {
+      display: none;
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      padding: 6px 14px; border-radius: 999px;
+      background: rgba(18, 21, 40, 0.9); border: 1px solid var(--panel-edge);
+      color: var(--gold); font-size: 0.85rem; white-space: nowrap; pointer-events: none;
+    }
+    @media (orientation: portrait) and (pointer: coarse) {
+      .rotate-hint { display: block; }
+    }
+    .overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: flex-start; justify-content: center;
+      background: rgba(5, 6, 12, 0.82);
+      padding: 16px;
+      overflow-y: auto;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
+    }
+    .overlay > .card { margin: auto 0; max-width: 640px; width: 100%; }
+
+    /* Floating game buttons */
+    .game-buttons { position: absolute; right: 12px; bottom: 12px; display: flex; gap: 8px; }
+    .icon-btn {
+      width: 44px; height: 44px; padding: 0; border-radius: 50%;
+      background: rgba(18, 21, 40, 0.85); border: 1px solid var(--panel-edge);
+      color: var(--text); font-size: 1.2rem; line-height: 1;
+    }
+    .close-row { text-align: center; margin-top: 16px; }
+
+    /* Results */
+    .results-title { text-align: center; margin: 0 0 4px; font-size: clamp(1.8rem, 7vw, 2.6rem); color: #fff; text-shadow: 0 0 16px var(--magenta); }
+    .results-sub { text-align: center; color: var(--muted); margin: 0 0 18px; }
+    .podium { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 20px; }
+    .podium-slot { flex: 1; max-width: 150px; text-align: center; min-width: 0; }
+    .podium-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; }
+    .podium-score { color: var(--muted); font-size: 0.9rem; margin-bottom: 6px; }
+    .podium-block {
+      border-radius: 10px 10px 0 0; display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 8px; font-size: 1.6rem; font-weight: 900; color: #041018;
+    }
+    .podium-slot.p1 .podium-block { height: 110px; }
+    .podium-slot.p2 .podium-block { height: 80px; }
+    .podium-slot.p3 .podium-block { height: 60px; }
+
+    .awards { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 18px; }
+    .award {
+      background: #0a0c18; border: 1px solid var(--panel-edge); border-radius: 10px;
+      padding: 10px; text-align: center;
+    }
+    .award-icon { font-size: 1.6rem; }
+    .award-title { font-weight: 800; color: var(--gold); letter-spacing: 0.05em; }
+    .award-desc { font-size: 0.75rem; color: var(--muted); }
+    .award-who { font-weight: 700; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .table-wrap { overflow-x: auto; margin-bottom: 18px; }
+    .stats-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    .stats-table th, .stats-table td { padding: 8px 6px; text-align: right; border-bottom: 1px solid var(--panel-edge); white-space: nowrap; }
+    .stats-table th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .stats-table th:first-child, .stats-table td:first-child { text-align: left; }
+    .stats-table tr.me td { color: #fff; font-weight: 700; }
+    .stats-table .left { color: var(--muted); font-size: 0.75rem; }
+    .results-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .results-actions button { flex: 1; min-width: 140px; }
+    .rematch-status { text-align: center; color: var(--muted); min-height: 1.3em; margin: 10px 0 0; font-size: 0.9rem; }
+
+    /* Toast */
+    .toast {
+      position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 10;
+      padding: 8px 16px; border-radius: 999px; background: rgba(18, 21, 40, 0.95);
+      border: 1px solid var(--gold); color: var(--gold); font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== HOME ===================== -->
+  <section id="home" class="screen">
+    <h1 class="logo">DÉJÀ BRAWL</h1>
+    <p class="tagline">Your past is their problem.</p>
+
+    <div class="home-grid">
+      <form id="home-form" class="card stack" autocomplete="off" onsubmit="return false">
+        <label for="name-input">Your name</label>
+        <input id="name-input" maxlength="12" placeholder="e.g. Ana" enterkeyhint="go">
+
+        <button id="create-btn" class="btn-primary btn-wide" type="button">Create Room</button>
+
+        <div class="divider">or join</div>
+
+        <div class="row">
+          <input id="code-input" maxlength="4" placeholder="CODE" autocapitalize="characters" spellcheck="false" enterkeyhint="go">
+          <button id="join-btn" class="btn-secondary" type="button" style="flex:1">Join Room</button>
+        </div>
+
+        <p id="home-error" class="error" role="alert"></p>
+      </form>
+
+      <div class="card rules" data-rules></div>
+    </div>
+  </section>
+
+  <!-- ===================== LOBBY ===================== -->
+  <section id="lobby" class="screen hidden">
+    <div class="code-block">
+      <div class="code-label">Room code</div>
+      <div id="room-code" class="room-code">----</div>
+      <button id="invite-btn" class="btn-secondary" type="button">Copy invite link</button><span id="copy-status" class="copy-status" aria-live="polite"></span>
+    </div>
+
+    <div class="lobby-grid">
+      <div class="card">
+        <div class="players-head">
+          <h2>Players</h2>
+          <span id="player-count">0/6</span>
+        </div>
+        <ul id="player-list"></ul>
+        <button id="start-btn" class="btn-primary btn-wide hidden" type="button" disabled>Start</button>
+        <p id="waiting-text" class="waiting hidden">Waiting for host</p>
+      </div>
+
+      <div class="card rules" data-rules></div>
+    </div>
+  </section>
+
+  <!-- ===================== GAME ===================== -->
+  <section id="game" class="hidden">
+    <canvas id="arena"></canvas>
+    <div class="rotate-hint">↻ Rotate for a bigger view</div>
+
+    <div class="game-buttons">
+      <button id="rules-btn" class="icon-btn" type="button" title="How to play" aria-label="How to play">?</button>
+      <button id="mute-btn" class="icon-btn" type="button" title="Mute" aria-label="Mute">🔊</button>
+    </div>
+
+    <div id="rules-overlay" class="overlay hidden">
+      <div class="card">
+        <div class="rules" data-rules></div>
+        <div class="close-row"><button id="rules-close" class="btn-primary" type="button">Got it</button></div>
+      </div>
+    </div>
+
+    <div id="results" class="overlay hidden">
+      <div class="card">
+        <h2 id="results-title" class="results-title">MATCH OVER</h2>
+        <p id="results-sub" class="results-sub"></p>
+        <div id="podium" class="podium"></div>
+        <div id="awards" class="awards"></div>
+        <div class="table-wrap">
+          <table class="stats-table">
+            <thead><tr><th>Player</th><th>Score</th><th>Coins</th><th>Haunts</th><th>Survived</th><th>Deaths</th></tr></thead>
+            <tbody id="stats-body"></tbody>
+          </table>
+        </div>
+        <div class="results-actions">
+          <button id="rematch-btn" class="btn-primary" type="button">Rematch (R)</button>
+          <button id="back-lobby-btn" class="btn-secondary" type="button">Back to lobby</button>
+        </div>
+        <p id="rematch-status" class="rematch-status"></p>
+      </div>
+    </div>
+  </section>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <template id="rules-template">
+    <h2>How to play</h2>
+    <ol>
+      <li>Move with <em>WASD</em> (or drag your thumb). Grab <em>gold coins</em>.</li>
+      <li>Every loop, your movement is recorded as a <em>ghost</em> that replays next loop.</li>
+      <li><em>Other players' ghosts kill you.</em> Yours don't — use them as traps.</li>
+      <li>Points: coin <em>+1</em> · your ghost kills someone <em>+3</em> · survive a loop <em>+2</em> · last alive <em>+3</em>. Highest after 6 loops wins.</li>
+    </ol>
+  </template>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/config.js"></script>
+  <script src="render.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
